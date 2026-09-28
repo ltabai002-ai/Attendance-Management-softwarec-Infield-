@@ -111,12 +111,12 @@
   background-size: 24px 24px;
 }
 
-@utility section-pad { padding-block: clamp(5rem,9vw,8.5rem); }
+@utility section-pad { padding-block: clamp(56px,6vw,80px); }
 @utility content-wrap { width: min(1180px,calc(100% - 2rem)); margin-inline: auto; }
 @utility scene-card { border: 1px solid color-mix(in oklab,var(--primary) 22%,var(--border)); border-radius: 1rem; background: var(--card); box-shadow: var(--shadow-card); }
 
-.chapter-number { color: transparent; -webkit-text-stroke: 1px var(--soft-tint); font-family: var(--font-display); font-size: clamp(2.5rem,5vw,4rem); font-weight: 800; line-height: 1; }
-.chapter-number::first-letter { color: var(--primary); -webkit-text-stroke: 0; }
+.chapter-number { color: var(--muted-foreground); font-family: var(--font-display); font-size: clamp(28px,3vw,40px); font-weight: 700; line-height: 1; }
+.chapter-number-first { color: var(--primary); }
 .eyebrow { display:inline-flex; align-items:center; min-height: 32px; border-radius:999px; background:var(--soft-tint); color:var(--primary); padding:.35rem .75rem; font-size:.75rem; font-weight:700; text-transform:uppercase; }
 .phone-shell { position:relative; width:min(290px,82vw); border:9px solid var(--deep-navy); border-radius:2.2rem; background:var(--deep-navy); padding:.35rem; box-shadow:0 30px 70px color-mix(in oklab,var(--deep-navy) 30%,transparent); }
 .phone-speaker { position:absolute; z-index:2; left:50%; top:12px; width:72px; height:16px; transform:translateX(-50%); border-radius:999px; background:var(--deep-navy); }
