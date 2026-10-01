@@ -10,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { ChaosToCalm, CheckBenefit, DashboardVisual, Logo, PhoneFrame, SolutionVisual } from "@/components/infield-visuals";
+import { Onboarding } from "@/components/Onboarding";
 
 const title = "INFIELD — Workforce Management App | Live Availability, Attendance & Payroll";
 const description = "See who's available, who's outside the work area and who's where — live. Track attendance, field visits and salary for construction, service centers, hospitals and field sales teams in one app. Book a demo.";
@@ -36,13 +37,25 @@ const industryData = {
 } as const;
 
 function InfieldPage() {
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window !== "undefined") {
+      return !localStorage.getItem("onboarding_complete_v3");
+    }
+    return false;
+  });
+
   const { scrollYProgress } = useScroll();
   const [scrolled,setScrolled] = useState(false);
   const [menu,setMenu] = useState(false);
   const [contactVisible,setContactVisible] = useState(false);
   useMotionValueEvent(useScroll().scrollY,"change",v=>setScrolled(v>24));
-  useEffect(()=>{ document.body.style.overflow=menu?"hidden":""; return()=>{document.body.style.overflow=""}},[menu]);
+  useEffect(()=>{ document.body.style.overflow=menu||showOnboarding?"hidden":""; return()=>{document.body.style.overflow=""}},[menu,showOnboarding]);
   useEffect(()=>{ const el=document.querySelector("#contact"); if(!el)return; const observer=new IntersectionObserver(([entry])=>setContactVisible(entry.isIntersecting),{threshold:.1}); observer.observe(el); return()=>observer.disconnect(); },[]);
+  
+  if (showOnboarding) {
+    return <Onboarding onComplete={() => setShowOnboarding(false)} />;
+  }
+
   return <main>
     <motion.div className="progress-line" style={{scaleX:scrollYProgress}} />
     <Navbar scrolled={scrolled} open={menu} setOpen={setMenu}/>
@@ -83,7 +96,7 @@ function ProblemSection() {
 }
 
 function TransitionQuestion() {
-  return <section className="section-pad bg-primary text-primary-foreground"><div className="content-wrap text-center max-w-4xl mx-auto"><h2 className="font-display text-[clamp(28px,4vw,48px)] font-bold leading-tight">Have you ever thought that all these problems could be solved in just one app?</h2></div></section>;
+  return <section className="section-pad relative overflow-hidden bg-primary text-primary-foreground"><div className="absolute inset-0 z-0 bg-[url('https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?auto=format&fit=crop&w=2069&q=80')] bg-cover bg-center bg-no-repeat opacity-25 mix-blend-luminosity pointer-events-none" /><div className="absolute inset-0 z-0 bg-primary/50 pointer-events-none" /><div className="content-wrap relative z-10 text-center max-w-4xl mx-auto"><h2 className="font-display text-[clamp(28px,4vw,48px)] font-bold leading-tight drop-shadow-md">Have you ever thought that all these problems could be solved in just one app?</h2></div></section>;
 }
 
 function Industries(){const [active,setActive]=useState<keyof typeof industryData>("Construction Site");const d=industryData[active];const Icon=d.icon;return <section className="section-pad bg-background"><div className="content-wrap"><div className="mx-auto max-w-760 text-center"><span className="eyebrow">Built for moving teams</span><h2 className="mt-5 font-display text-[clamp(26px,3vw,40px)] font-bold text-navy max-w-[720px] mx-auto">One App for Every Team That <span className="text-primary">Works On the Move</span></h2></div><div className="mt-10 flex gap-2 overflow-x-auto pb-2">{Object.keys(industryData).map(k=><Button key={k} onClick={()=>setActive(k as keyof typeof industryData)} variant={active===k?"hero":"lightOutline"} size="lg" className="shrink-0">{k}</Button>)}</div><motion.div key={active} initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} className="mx-auto mt-8 grid max-w-4xl items-center gap-8 scene-card p-5 sm:p-8 md:grid-cols-2"><div><span className="grid size-14 place-items-center rounded-xl bg-soft-tint text-primary"><Icon/></span><p className="mt-5 text-sm font-bold uppercase text-primary">{d.metric}</p><h3 className="mt-2 text-3xl font-bold text-navy">{d.value}</h3><p className="mt-2 font-semibold text-navy">{d.detail}</p><p className="mt-5 text-lg">{d.copy}</p>{(active==="Construction Site"||active==="Service Center")&&<div className="mt-6 flex items-center gap-3 rounded-xl border border-border bg-card p-2 pr-4 w-fit"><img src={active==="Construction Site"?"/construction.png":"/support.png"} alt="Industry professional" className="size-12 rounded-full object-cover shadow-sm"/><span className="text-xs font-semibold text-navy max-w-[150px] leading-tight">Built specifically for your team's workflow.</span></div>}</div><div className="mx-auto relative"><PhoneFrame scene={active==="Service Center"?"serviceCenter":active==="Field Sales"?"fieldSales":active==="Hospital"?"hospital":"construction"}/></div></motion.div></div></section>}
