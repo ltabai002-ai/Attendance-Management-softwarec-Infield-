@@ -241,7 +241,6 @@ function Contact() {
     } catch (err) {}
 
     setStatus("success");
-    window.open(whatsapp, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -278,11 +277,8 @@ function Contact() {
           {status === "success" ? (
             <div className="mt-8 rounded-xl bg-available-soft p-6 text-center">
               <span className="mx-auto grid size-12 place-items-center rounded-full bg-available text-primary-foreground"><Check/></span>
-              <h4 className="mt-4 text-xl font-bold text-navy">Your request is saved.</h4>
-              <p className="mt-2 text-muted-foreground">We'll continue on WhatsApp.</p>
-              <a className="mt-4 inline-flex min-h-11 items-center font-bold text-primary underline" href={whatsapp} target="_blank" rel="noreferrer">
-                Didn't open WhatsApp? Click here
-              </a>
+              <h4 className="mt-4 text-xl font-bold text-navy">Thank You! Your Request Has Been Saved.</h4>
+              <p className="mt-2 text-muted-foreground">Our team will reach out to you shortly.</p>
             </div>
           ) : (
             <div className="mt-6 grid gap-5">
