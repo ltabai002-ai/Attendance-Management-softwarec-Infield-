@@ -39,7 +39,13 @@ const industryData = {
 function InfieldPage() {
   const [showOnboarding, setShowOnboarding] = useState(() => {
     if (typeof window !== "undefined") {
-      return !localStorage.getItem("onboarding_complete_v3");
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has("reset") || urlParams.has("questionnaire")) {
+        sessionStorage.removeItem("onboarding_complete_session");
+        localStorage.removeItem("onboarding_complete_v3");
+        return true;
+      }
+      return !sessionStorage.getItem("onboarding_complete_session");
     }
     return false;
   });
@@ -117,12 +123,291 @@ function Steps(){const steps=["Book a Demo","Add Your Team","Set Your Work Radiu
 
 function Faq(){const qs=["Do employees need a smartphone?","Is tracking only during working hours?","What happens during breaks?","Can I set a different radius for each site?","Does it drain battery or data?","How is salary calculated?","How much does it cost?"];return <section id="faq" className="section-pad"><div className="content-wrap flex flex-col items-center text-center gap-10"><div className="w-full max-w-[720px]"><span className="eyebrow">FAQ</span><h2 className="mt-5 text-[clamp(26px,3vw,40px)] font-bold text-navy">Questions Business Owners Ask</h2></div><Accordion type="single" defaultValue="q0" collapsible className="scene-card w-full max-w-[800px] px-5">{qs.map((q,i)=><AccordionItem key={q} value={`q${i}`}><AccordionTrigger className="py-5 text-left text-base font-bold text-navy hover:no-underline">{q}</AccordionTrigger><AccordionContent className="text-base text-left text-muted-foreground">Yes, you can track this easily in the INFIELD app.</AccordionContent></AccordionItem>)}</Accordion></div></section>}
 
-type FormData={name:string;company:string;phone:string;email:string;city:string;team_size:string;industry:string;message:string};
-const empty:FormData={name:"",company:"",phone:"",email:"",city:"",team_size:"",industry:"",message:""};
-function Contact(){const [form,setForm]=useState(empty);const [errors,setErrors]=useState<Partial<Record<keyof FormData,string>>>({});const [status,setStatus]=useState<"idle"|"loading"|"success"|"error">("idle");const whatsapp=useMemo(()=>`https://wa.me/919164060961?text=${encodeURIComponent(`Hi INFIELD Team, I want a demo of the workforce management app.\nName: ${form.name}\nCompany: ${form.company}\nPhone: ${form.phone}\nCity: ${form.city}\nTeam Size: ${form.team_size}\nIndustry: ${form.industry}\nMessage: ${form.message}`)}`,[form]);
-  const submit=async(e:FormEvent)=>{e.preventDefault();const next:typeof errors={};if(form.name.trim().length<2)next.name="Enter your full name";if(form.company.trim().length<2)next.company="Enter your company name";if(!/^[6-9]\d{9}$/.test(form.phone))next.phone="Enter a valid 10-digit mobile number";if(form.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))next.email="Enter a valid email";if(form.city.trim().length<2)next.city="Enter your city";if(!form.team_size)next.team_size="Select your team size";if(!form.industry)next.industry="Select your industry";setErrors(next);if(Object.keys(next).length)return;setStatus("loading");const {error}=await supabase.from("demo_requests").insert({...form,email:form.email||null,message:form.message||null});if(error){setStatus("error");return;}setStatus("success");window.open(whatsapp,"_blank","noopener,noreferrer")};
-  const set=(k:keyof FormData,v:string)=>{setForm(p=>({...p,[k]:v}));setErrors(p=>({...p,[k]:undefined}))};
-  return <section id="contact" className="scene-gradient relative overflow-hidden section-pad text-on-dark"><div className="absolute inset-0 z-0 bg-[url('/support.png')] bg-cover bg-center bg-no-repeat opacity-20 pointer-events-none mix-blend-luminosity" /><div className="absolute inset-0 z-0 bg-deep-navy/40 pointer-events-none" /><div className="absolute inset-0 z-0 dot-grid opacity-50 pointer-events-none" /><div className="content-wrap relative z-10 grid items-center gap-12 lg:grid-cols-2"><div><Chapter n="10 / 10" eyebrow="Book your demo" title="Don't Just Manage Your Team." accent="Manage Your Workforce. Smarter." dark/><p className="mt-5 text-lg text-on-dark/80">One app. One dashboard. Complete workforce control.</p><ul className="mt-7 grid gap-3">{["Free demo","No obligation","Setup support included"].map(x=><li className="flex items-center gap-3" key={x}><span className="grid size-6 place-items-center rounded-full bg-sky text-deep-navy"><Check className="size-4"/></span>{x}</li>)}</ul><div className="mt-10 max-w-lg"><div className="mb-6 flex items-center gap-4 rounded-xl border border-on-dark/20 bg-on-dark/10 p-4"><img src="/support.png" alt="Customer Support" className="size-14 rounded-full object-cover shadow-sm"/><div className="min-w-0"><b className="block text-sm text-on-dark">Talk to a real human</b><span className="text-sm text-on-dark/80">Our experts will configure the app for your needs.</span></div></div><DashboardVisual/></div></div><form onSubmit={submit} noValidate className="rounded-2xl bg-card p-5 text-foreground shadow-scene sm:p-8 relative z-10"><h3 className="text-2xl font-bold text-navy">Book a Demo Today</h3>{status==="success"?<div className="mt-8 rounded-xl bg-available-soft p-6 text-center"><span className="mx-auto grid size-12 place-items-center rounded-full bg-available text-primary-foreground"><Check/></span><h4 className="mt-4 text-xl font-bold text-navy">Your request is saved.</h4><p className="mt-2">We'll continue on WhatsApp.</p><a className="mt-4 inline-flex min-h-11 items-center font-bold text-primary underline" href={whatsapp} target="_blank" rel="noreferrer">Didn't open WhatsApp? Click here</a></div>:<><div className="mt-6 grid gap-4 sm:grid-cols-2"><Field label="Full Name*" error={errors.name}><input className={`field ${errors.name?"field-error":""}`} value={form.name} onChange={e=>set("name",e.target.value)} placeholder="Your full name"/></Field><Field label="Company Name*" error={errors.company}><input className={`field ${errors.company?"field-error":""}`} value={form.company} onChange={e=>set("company",e.target.value)} placeholder="Company name"/></Field><Field label="Phone*" error={errors.phone}><div className="grid grid-cols-[auto_1fr]"><span className="grid min-h-12 place-items-center rounded-l-xl border border-r-0 border-input bg-muted px-3 text-sm">+91</span><input inputMode="numeric" maxLength={10} className={`field rounded-l-none ${errors.phone?"field-error":""}`} value={form.phone} onChange={e=>set("phone",e.target.value.replace(/\D/g,""))} placeholder="10-digit number"/></div></Field><Field label="Email" error={errors.email}><input type="email" className={`field ${errors.email?"field-error":""}`} value={form.email} onChange={e=>set("email",e.target.value)} placeholder="name@company.com"/></Field><Field label="City*" error={errors.city}><input className={`field ${errors.city?"field-error":""}`} value={form.city} onChange={e=>set("city",e.target.value)} placeholder="Your city"/></Field><Field label="Team Size*" error={errors.team_size}><select className={`field ${errors.team_size?"field-error":""}`} value={form.team_size} onChange={e=>set("team_size",e.target.value)}><option value="">Select…</option>{["1–20","21–50","51–200","200+"].map(x=><option key={x}>{x}</option>)}</select></Field><Field label="Industry*" error={errors.industry}><select className={`field ${errors.industry?"field-error":""}`} value={form.industry} onChange={e=>set("industry",e.target.value)}><option value="">Select…</option>{["Construction","Service Center","Hospital","Field Sales","Other"].map(x=><option key={x}>{x}</option>)}</select></Field><Field label="Message"><textarea className="field min-h-28 resize-y" value={form.message} maxLength={1000} onChange={e=>set("message",e.target.value)} placeholder="Tell us about your team"/></Field></div>{status==="error"&&<p className="mt-4 text-sm font-semibold text-alert">We couldn't save your request. Please try again.</p>}<Button disabled={status==="loading"} variant="hero" size="lg" className="mt-6 w-full">{status==="loading"?<span className="size-5 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground"/>:<MessageCircle/>}{status==="loading"?"Saving…":"Book My Demo on WhatsApp"}<ArrowRight/></Button></>}</form></div></section>}
+const rolesOptions = [
+  "Owner / Founder",
+  "HR / Admin Manager",
+  "Operations Manager",
+  "Sales Manager",
+  "Project / Site Manager",
+  "Other"
+];
+
+const challengesOptions = [
+  { id: "tracking", label: "Difficulty tracking team attendance and locations" },
+  { id: "payroll", label: "Manual payroll calculation and timesheet errors" },
+  { id: "leaving", label: "Employees leaving the work area without notice" },
+  { id: "sales", label: "Lack of visibility into field sales or site visits" },
+  { id: "scheduling", label: "Chaotic team communication and scheduling" }
+];
+
+const featuresOptions = [
+  { id: "availability", label: "Live Staff Availability & Locations" },
+  { id: "attendance", label: "Auto Attendance & Timesheets" },
+  { id: "radius", label: "Work Area Radius Alerts" },
+  { id: "payroll", label: "Auto Payroll & Salary Calculation" },
+  { id: "visits", label: "Field Sales & Visit Tracking" },
+  { id: "roster", label: "Shift Scheduling & Roster Management" }
+];
+
+type FormData = {
+  role: string;
+  challenge: string;
+  feature: string;
+  name: string;
+  company: string;
+  phone: string;
+  city: string;
+  team_size: string;
+};
+
+const emptyForm: FormData = {
+  role: "",
+  challenge: "",
+  feature: "",
+  name: "",
+  company: "",
+  phone: "",
+  city: "",
+  team_size: ""
+};
+
+function Contact() {
+  const [form, setForm] = useState(emptyForm);
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const setField = (k: keyof FormData, v: any) => {
+    setForm(p => ({ ...p, [k]: v }));
+    setErrors(p => ({ ...p, [k]: undefined }));
+  };
+
+  const whatsapp = useMemo(() => {
+    const msg = `Hi INFIELD Team, I want a demo of the workforce management app.\n\nRole: ${form.role}\nChallenge: ${form.challenge}\nFeature Needed: ${form.feature}\nName: ${form.name}\nBusiness: ${form.company}\nPhone: ${form.phone}\nCity: ${form.city}\nTeam Size: ${form.team_size}`;
+    return `https://wa.me/919164060961?text=${encodeURIComponent(msg)}`;
+  }, [form]);
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    const next: Partial<Record<keyof FormData, string>> = {};
+    if (!form.role) next.role = "Select your role";
+    if (!form.challenge) next.challenge = "Select your main challenge";
+    if (!form.feature) next.feature = "Select feature needed";
+    if (form.name.trim().length < 2) next.name = "Enter your full name";
+    if (form.company.trim().length < 2) next.company = "Enter your business name";
+    if (!/^[6-9]\d{9}$/.test(form.phone)) next.phone = "Enter a valid 10-digit mobile number";
+    if (form.city.trim().length < 2) next.city = "Enter your city";
+    if (!form.team_size) next.team_size = "Select your team size";
+
+    setErrors(next);
+    if (Object.keys(next).length) return;
+
+    setStatus("loading");
+
+    const payload = {
+      role: form.role,
+      challenges: form.challenge,
+      features: form.feature,
+      name: form.name,
+      phone: form.phone,
+      business: form.company,
+      city: form.city,
+      teamSize: form.team_size,
+      timestamp: new Date().toISOString()
+    };
+
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxulGiwHQXHipMx74m1Xv65zZgSIpY7Ni2h0U1iYy2HSA7nx7HKrdL66_dzVz1Ttdg/exec";
+
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error("Failed sending to Google Sheets", err);
+    }
+
+    try {
+      await supabase.from("demo_requests").insert({
+        name: form.name,
+        company: form.company,
+        phone: form.phone,
+        city: form.city,
+        team_size: form.team_size,
+        industry: form.role,
+        message: `Challenge: ${payload.challenges} | Feature: ${payload.features}`
+      });
+    } catch (err) {}
+
+    setStatus("success");
+    window.open(whatsapp, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <section id="contact" className="scene-gradient relative overflow-hidden section-pad text-on-dark">
+      <div className="absolute inset-0 z-0 bg-[url('/support.png')] bg-cover bg-center bg-no-repeat opacity-20 pointer-events-none mix-blend-luminosity" />
+      <div className="absolute inset-0 z-0 bg-deep-navy/40 pointer-events-none" />
+      <div className="absolute inset-0 z-0 dot-grid opacity-50 pointer-events-none" />
+      <div className="content-wrap relative z-10 grid items-center gap-12 lg:grid-cols-2">
+        <div>
+          <Chapter n="10 / 10" eyebrow="Book your demo" title="Don't Just Manage Your Team." accent="Manage Your Workforce. Smarter." dark/>
+          <p className="mt-5 text-lg text-on-dark/80">One app. One dashboard. Complete workforce control.</p>
+          <ul className="mt-7 grid gap-3">
+            {["Free demo", "No obligation", "Setup support included"].map(x => (
+              <li className="flex items-center gap-3" key={x}>
+                <span className="grid size-6 place-items-center rounded-full bg-sky text-deep-navy"><Check className="size-4"/></span>
+                {x}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-10 max-w-lg">
+            <div className="mb-6 flex items-center gap-4 rounded-xl border border-on-dark/20 bg-on-dark/10 p-4">
+              <img src="/support.png" alt="Customer Support" className="size-14 rounded-full object-cover shadow-sm"/>
+              <div className="min-w-0">
+                <b className="block text-sm text-on-dark">Talk to a real human</b>
+                <span className="text-sm text-on-dark/80">Our experts will configure the app for your needs.</span>
+              </div>
+            </div>
+            <DashboardVisual/>
+          </div>
+        </div>
+
+        <form onSubmit={submit} noValidate className="rounded-2xl bg-card p-5 text-foreground shadow-scene sm:p-8 relative z-10">
+          <h3 className="text-2xl font-bold text-navy">Book a Demo Today</h3>
+          {status === "success" ? (
+            <div className="mt-8 rounded-xl bg-available-soft p-6 text-center">
+              <span className="mx-auto grid size-12 place-items-center rounded-full bg-available text-primary-foreground"><Check/></span>
+              <h4 className="mt-4 text-xl font-bold text-navy">Your request is saved.</h4>
+              <p className="mt-2 text-muted-foreground">We'll continue on WhatsApp.</p>
+              <a className="mt-4 inline-flex min-h-11 items-center font-bold text-primary underline" href={whatsapp} target="_blank" rel="noreferrer">
+                Didn't open WhatsApp? Click here
+              </a>
+            </div>
+          ) : (
+            <div className="mt-6 grid gap-5">
+              <Field label="What is your role?*" error={errors.role}>
+                <select
+                  className={`field ${errors.role ? "field-error" : ""}`}
+                  value={form.role}
+                  onChange={e => setField("role", e.target.value)}
+                >
+                  <option value="">Select your role...</option>
+                  {rolesOptions.map(r => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="What are the challenges you are facing?*" error={errors.challenge}>
+                <select
+                  className={`field ${errors.challenge ? "field-error" : ""}`}
+                  value={form.challenge}
+                  onChange={e => setField("challenge", e.target.value)}
+                >
+                  <option value="">Select your main challenge...</option>
+                  {challengesOptions.map(c => (
+                    <option key={c.id} value={c.label}>{c.label}</option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="What features do you need?*" error={errors.feature}>
+                <select
+                  className={`field ${errors.feature ? "field-error" : ""}`}
+                  value={form.feature}
+                  onChange={e => setField("feature", e.target.value)}
+                >
+                  <option value="">Select feature needed...</option>
+                  {featuresOptions.map(f => (
+                    <option key={f.id} value={f.label}>{f.label}</option>
+                  ))}
+                </select>
+              </Field>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Full Name*" error={errors.name}>
+                  <input
+                    className={`field ${errors.name ? "field-error" : ""}`}
+                    value={form.name}
+                    onChange={e => setField("name", e.target.value)}
+                    placeholder="Your full name"
+                  />
+                </Field>
+
+                <Field label="Phone Number*" error={errors.phone}>
+                  <div className="grid grid-cols-[auto_1fr]">
+                    <span className="grid min-h-12 place-items-center rounded-l-xl border border-r-0 border-input bg-muted px-3 text-sm">+91</span>
+                    <input
+                      inputMode="numeric"
+                      maxLength={10}
+                      className={`field rounded-l-none ${errors.phone ? "field-error" : ""}`}
+                      value={form.phone}
+                      onChange={e => setField("phone", e.target.value.replace(/\D/g, ""))}
+                      placeholder="10-digit number"
+                    />
+                  </div>
+                </Field>
+
+                <Field label="City / Location*" error={errors.city}>
+                  <input
+                    className={`field ${errors.city ? "field-error" : ""}`}
+                    value={form.city}
+                    onChange={e => setField("city", e.target.value)}
+                    placeholder="e.g. Bangalore"
+                  />
+                </Field>
+
+                <Field label="Business Name*" error={errors.company}>
+                  <input
+                    className={`field ${errors.company ? "field-error" : ""}`}
+                    value={form.company}
+                    onChange={e => setField("company", e.target.value)}
+                    placeholder="Name of your organization"
+                  />
+                </Field>
+              </div>
+
+              <Field label="Team Size*" error={errors.team_size}>
+                <select
+                  className={`field ${errors.team_size ? "field-error" : ""}`}
+                  value={form.team_size}
+                  onChange={e => setField("team_size", e.target.value)}
+                >
+                  <option value="">Select team size...</option>
+                  {["1–20", "21–50", "51–200", "200+"].map(x => (
+                    <option key={x} value={x}>{x}</option>
+                  ))}
+                </select>
+              </Field>
+
+              {status === "error" && (
+                <p className="text-sm font-semibold text-alert">
+                  We couldn't save your request. Please try again.
+                </p>
+              )}
+
+              <Button
+                disabled={status === "loading"}
+                variant="hero"
+                size="lg"
+                className="mt-2 w-full"
+              >
+                {status === "loading" ? (
+                  <span className="size-5 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground" />
+                ) : (
+                  <MessageCircle />
+                )}
+                {status === "loading" ? "Booking..." : "Book an Appointment"}
+                <ArrowRight />
+              </Button>
+            </div>
+          )}
+        </form>
+      </div>
+    </section>
+  );
+}
 function Field({label,error,children}:{label:string;error?:string;children:React.ReactNode}){return <label className="grid gap-2 text-sm font-semibold text-navy"><span>{label}</span>{children}{error&&<span className="text-xs text-alert">{error}</span>}</label>}
 
 function Footer(){return <footer className="scene-gradient pb-24 pt-14 text-on-dark md:pb-8"><div className="content-wrap grid gap-10 md:grid-cols-4"><div><span className="inline-flex rounded-xl bg-card p-2 text-navy"><img src="/logo.png" alt="INFIELD" className="h-8 w-auto object-contain" /></span><p className="mt-4 text-on-dark/75">Manage Your Workforce. Smarter.</p></div><FooterCol title="Features" links={[["Availability","#availability"],["Work Radius","#radius"],["Auto Resume","#resume"],["Field Sales","#sales"],["Attendance","#attendance"],["Payroll","#payroll"]]}/><FooterCol title="Industries" links={[["Construction","#contact"],["Service Center","#contact"],["Hospital","#contact"],["Field Sales","#contact"]]}/><div><h3 className="font-bold">Contact</h3><div className="mt-4 grid gap-3 text-sm text-on-dark/75"><a href="tel:+919164060961">+91 9164060961</a><a href="https://wa.me/919164060961">WhatsApp</a><span>Email: Confirm with INFIELD</span></div></div></div><div className="content-wrap mt-12 flex flex-col gap-3 border-t border-on-dark/20 pt-6 text-sm text-on-dark/70 sm:flex-row sm:justify-between"><span>© 2026 INFIELD. All rights reserved.</span><span>Privacy Policy · Terms & Conditions</span></div></footer>}

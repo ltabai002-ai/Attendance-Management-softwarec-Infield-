@@ -78,7 +78,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
           timestamp: new Date().toISOString()
         };
 
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlYzOqA67OQJb-LKH66ycUBL1zMuHfx2CiRkmDzKRiYGkiHmzkEbKFB1fa-R7MAqI/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxulGiwHQXHipMx74m1Xv65zZgSIpY7Ni2h0U1iYy2HSA7nx7HKrdL66_dzVz1Ttdg/exec";
         
         if (GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_SCRIPT_WEB_APP_URL") {
           await fetch(GOOGLE_SCRIPT_URL, {
@@ -94,7 +94,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
         console.error("Failed to send data to Google Sheets", err);
       } finally {
         setIsSubmitting(false);
-        localStorage.setItem("onboarding_complete_v3", "true");
+        sessionStorage.setItem("onboarding_complete_session", "true");
         onComplete();
       }
     }
@@ -116,7 +116,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
               Step {step} of 4
             </div>
             <Button variant="outline" size="sm" onClick={() => {
-              localStorage.setItem("onboarding_complete_v3", "true");
+              sessionStorage.setItem("onboarding_complete_session", "true");
               onComplete();
             }}>
               Explore Website <ArrowRight className="ml-1 size-4" />
