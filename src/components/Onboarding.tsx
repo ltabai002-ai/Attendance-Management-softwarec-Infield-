@@ -110,7 +110,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
       
       <div className="relative z-10 w-full max-w-xl scene-card bg-card p-6 shadow-scene sm:p-10">
         <div className="mb-8 flex items-center justify-between">
-          <img src="/logo.png" alt="INFIELD" className="h-8 w-auto object-contain brightness-0" />
+          <img src="/markpresent.webp" alt="INFIELD" className="h-8 w-auto object-contain" />
           <div className="flex items-center gap-4">
             <div className="text-sm font-semibold text-muted-foreground hidden sm:block">
               Step {step} of 4
