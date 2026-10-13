@@ -11,3 +11,4 @@
 
 - Keep the INFIELD experience as one anchored scrolling landing page because its scene-by-scene narrative and navigation are explicitly sequential.
 - Build interface illustrations with semantic HTML/CSS and Lucide icons so every product screen remains responsive and readable without external imagery.
+- Keep root shell and boundary JSX in src/components/root-layout.tsx, with a JSX-free root route and getRouteApi for context, to avoid production route-parser failures and circular route imports.
