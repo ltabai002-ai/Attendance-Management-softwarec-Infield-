@@ -2,6 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { HeadContent, Link, Outlet, Scripts, getRouteApi, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { reportLovableError } from "@/lib/lovable-error-reporting";
+import { ConsentBanner } from "@/components/consent-banner";
 
 const rootRoute = getRouteApi("__root__");
 
@@ -65,6 +66,7 @@ export function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <ConsentBanner />
     </QueryClientProvider>
   );
 }
